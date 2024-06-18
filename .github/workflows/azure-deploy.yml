@@ -1,0 +1,32 @@
+name: Deploy to Azure Web App
+
+on:
+  push:
+    branches:
+      - master # Or main, depending on your default branch
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up .NET Core
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: '3.1' # Specify your .NET Core version
+
+    - name: Build with dotnet
+      run: dotnet build --configuration Release
+
+    - name: Publish with dotnet
+      run: dotnet publish -c Release -o ./publish
+
+    - name: Deploy to Azure Web App
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: 'Contact-Database-Application-vv' # Replace with your Azure Web App name
+        slot-name: 'production' # Optional: remove if not deploying to a slot
+        publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }} # Set in GitHub secrets
+        package: './publish'
